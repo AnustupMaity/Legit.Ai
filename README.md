@@ -28,9 +28,10 @@ It provides a seamless, "iLovePDF-style" public detection portal for users, and 
 
 ```mermaid
 graph TD
-    subgraph Frontend
+    subgraph Frontend - React/Vite
         A[Public User Portal]
         B[Admin / Trainer Dashboard]
+        note1[Unified Single Deployment]
     end
 
     subgraph Backend - FastAPI
@@ -98,25 +99,28 @@ python -m uvicorn main:app --port 8000
 
 *The first request may be slow as the system downloads the required Hugging Face model weights.*
 
-### 2. Main Site Setup (Public Portal)
+### 2. Frontend Setup (Public & Admin Portals)
+
+The public portal and the admin dashboard are unified into a single React application for easy deployment.
 
 ```sh
 cd frontend
 npm install
 npm run dev -- --port 3000
 ```
-- UI is available at: [http://localhost:3000](http://localhost:3000)
-
-### 3. Admin / Trainer Site Setup
-
-```sh
-cd admin-site
-npm install
-npm run dev -- --port 3001
-```
-- Admin UI is available at: [http://localhost:3001](http://localhost:3001)
+- **Public UI is available at:** [http://localhost:3000](http://localhost:3000)
+- **Admin Portal is available at:** [http://localhost:3000/admin-site/login](http://localhost:3000/admin-site/login)
 
 *(On first backend startup, a default admin account is automatically provisioned. Username: `admin`, Password: `adminpass`. It is highly recommended to change this in production).*
+
+---
+
+## ☁️ Deployment
+
+Legit.ai can be deployed completely for free! 
+- **Backend**: Deploy the `huggingfaceuploads/` folder to a **Hugging Face Docker Space** (gives 16GB RAM for ML models).
+- **Frontend**: Deploy the `frontend/` folder to **Vercel**.
+*(Detailed deployment instructions are available in `deployment_guide.md`).*
 
 ---
 
