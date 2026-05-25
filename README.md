@@ -1,6 +1,10 @@
 <div align="center">
-  <img src="https://img.shields.io/badge/Status-Active-success" alt="Status">
-  <img src="https://img.shields.io/badge/License-MIT-blue" alt="License">
+  <a href="https://legitai-app.vercel.app/" target="_blank">
+    <img src="https://img.shields.io/badge/Deployed_on-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Deployed on Vercel">
+  </a>
+  <img src="https://img.shields.io/badge/Status-Active-success?style=for-the-badge" alt="Status">
+  <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="License">
+  
   <h1>🛡️ Legit.ai</h1>
   <p><b>Advanced AI-Powered Misinformation & Deepfake Detection Platform</b></p>
 </div>
@@ -10,6 +14,8 @@
 ## 📖 Overview
 
 Legit.ai is a privacy-first, fully-featured platform designed to detect potentially misleading text, images, and audio using a **hybrid Machine Learning stack**. 
+
+🌍 **Try the Live Demo here: [https://legitai-app.vercel.app/](https://legitai-app.vercel.app/)**
 
 It provides a seamless, "iLovePDF-style" public detection portal for users, and a deeply secured JWT-authenticated dashboard for Admins and AI Trainers to manage the system and track metrics.
 
@@ -23,7 +29,6 @@ It provides a seamless, "iLovePDF-style" public detection portal for users, and 
 - **⚡ GPU Acceleration:** Automatically detects and utilizes CUDA-compatible GPUs for rapid model inference, falling back to CPU gracefully.
 
 ---
-
 ## 🏗️ Architecture Flowchart
 
 ```mermaid
@@ -117,11 +122,12 @@ npm run dev -- --port 3000
 
 ## ☁️ Deployment
 
-Legit.ai can be deployed completely for free! 
+Legit.ai is currently deployed and live at: **[legitai-app.vercel.app](https://legitai-app.vercel.app/)**
+
+If you want to host your own instance, Legit.ai can be deployed completely for free! 
 - **Backend**: Deploy the `huggingfaceuploads/` folder to a **Hugging Face Docker Space** (gives 16GB RAM for ML models).
 - **Frontend**: Deploy the `frontend/` folder to **Vercel**.
 *(Detailed deployment instructions are available in `deployment_guide.md`).*
-
 ---
 
 ## ⚙️ Environment Variables (`api/.env`)
