@@ -8,7 +8,7 @@
   <h1>🛡️ Legit.ai</h1>
   <p><b>Advanced AI-Powered Misinformation & Deepfake Detection Platform</b></p>
 </div>
----
+
 
 ## 📖 Overview
 
