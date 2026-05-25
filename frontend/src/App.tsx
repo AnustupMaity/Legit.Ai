@@ -12,6 +12,9 @@ import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import AdminLogin from "./pages/admin_site/Login";
+import AdminDashboard from "./pages/admin_site/AdminDashboard";
+import TrainerDashboard from "./pages/trainer_site/TrainerDashboard";
 const queryClient = new QueryClient();
 
 import { useLocation } from "react-router-dom";
@@ -19,6 +22,17 @@ import { useLocation } from "react-router-dom";
 const AppContent = () => {
   const location = useLocation();
   const isHome = location.pathname === "/";
+  const isAdminOrTrainer = location.pathname.startsWith("/admin-site") || location.pathname.startsWith("/trainer-site");
+
+  if (isAdminOrTrainer) {
+    return (
+      <Routes>
+        <Route path="/admin-site/login" element={<AdminLogin />} />
+        <Route path="/admin-site/dashboard" element={<AdminDashboard />} />
+        <Route path="/trainer-site/dashboard" element={<TrainerDashboard />} />
+      </Routes>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-white font-mono uppercase tracking-widest selection:bg-white selection:text-black">
