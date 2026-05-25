@@ -12,8 +12,11 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
-COPY . .
+# Copy application code into the api package structure
+COPY . /app/api
+
+# Add both /app and /app/api to PYTHONPATH to resolve inconsistent imports
+ENV PYTHONPATH="/app:/app/api"
 
 # Create models directory for caching
 RUN mkdir -p /app/models
@@ -22,4 +25,4 @@ RUN mkdir -p /app/models
 EXPOSE 7860
 
 # Default command
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "7860"]
