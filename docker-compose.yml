@@ -1,0 +1,116 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: legit_ai_postgres
+    environment:
+      POSTGRES_USER: legit_ai
+      POSTGRES_PASSWORD: legit_ai_password
+      POSTGRES_DB: legit_ai
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U legit_ai"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - legit_ai_network
+
+  # Redis for Celery and caching
+  redis:
+    image: redis:7-alpine
+    container_name: legit_ai_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - legit_ai_network
+
+  # FastAPI Backend
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: legit_ai_api
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://legit_ai:legit_ai_password@postgres:5432/legit_ai
+      - ASYNC_DATABASE_URL=postgresql+asyncpg://legit_ai:legit_ai_password@postgres:5432/legit_ai
+      - USE_ASYNC_DB=true
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_BACKEND_URL=redis://redis:6379/1
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - HF_TOKEN=${HF_TOKEN:-}
+      - USE_LLM=${USE_LLM:-false}
+      - EAGER_LOAD_MODELS=${EAGER_LOAD_MODELS:-true}
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:8080
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./api:/app
+      - api_models:/app/models
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - legit_ai_network
+
+  # Celery Worker for async ML processing
+  celery_worker:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: legit_ai_celery_worker
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://legit_ai:legit_ai_password@postgres:5432/legit_ai
+      - ASYNC_DATABASE_URL=postgresql+asyncpg://legit_ai:legit_ai_password@postgres:5432/legit_ai
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_BACKEND_URL=redis://redis:6379/1
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - HF_TOKEN=${HF_TOKEN:-}
+      - USE_LLM=${USE_LLM:-false}
+    volumes:
+      - ./api:/app
+      - api_models:/app/models
+    depends_on:
+      - postgres
+      - redis
+    command: celery -A celery_app worker --loglevel=info --concurrency=2
+    networks:
+      - legit_ai_network
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: legit_ai_frontend
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    networks:
+      - legit_ai_network
+
+volumes:
+  postgres_data:
+    driver: local
+  api_models:
+    driver: local
+
+networks:
+  legit_ai_network:
+    driver: bridge

@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 70%;
+
+    --accent: 0 0% 100%;
+    --accent-foreground: 0 0% 0%;
+
+    --destructive: 0 0% 100%;
+    --destructive-foreground: 0 0% 0%;
+
+    --border: 0 0% 100%;
+    --input: 0 0% 100%;
+    --ring: 0 0% 100%;
+
+    --safe: 0 0% 100%;
+    --warning: 0 0% 100%;
+    --danger: 0 0% 100%;
+    --info: 0 0% 100%;
+    --safe-foreground: 0 0% 0%;
+    --warning-foreground: 0 0% 0%;
+    --danger-foreground: 0 0% 0%;
+    --info-foreground: 0 0% 0%;
+    
+    --monitoring: 0 0% 100%;
+    --monitoring-foreground: 0 0% 0%;
+    --scanning: 0 0% 100%;
+    --scanning-foreground: 0 0% 0%;
+    --protected: 0 0% 100%;
+    --protected-foreground: 0 0% 0%;
+
+    --radius: 0rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-mono uppercase tracking-widest;
+  }
+}
