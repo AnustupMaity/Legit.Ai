@@ -150,6 +150,9 @@ api/models/
 models/
 .huggingface/
 
+# Prepared HuggingFace upload folder
+huggingfaceuploads/
+
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
