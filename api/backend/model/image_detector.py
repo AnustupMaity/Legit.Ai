@@ -96,6 +96,66 @@ def _classify_ai_image(image_bytes: bytes) -> tuple[bool, float, str]:
     return fake, round(score * 100, 1), label
 
 
+def _analyze_exif(image_bytes: bytes) -> tuple[bool, str, float]:
+    """Returns (is_suspicious, reason, confidence_boost)."""
+    try:
+        from PIL import Image, ExifTags
+        import io
+        image = Image.open(io.BytesIO(image_bytes))
+        exif = image.getexif()
+        if not exif:
+            return False, "No EXIF data found (common in web images).", 0.0
+            
+        exif_dict = {}
+        for k, v in exif.items():
+            tag = ExifTags.TAGS.get(k, k)
+            exif_dict[str(tag)] = str(v)
+            
+        software = exif_dict.get("Software", "").lower()
+        if any(ai_tool in software for ai_tool in ["midjourney", "dall-e", "stable diffusion", "ai", "generative"]):
+            return True, f"EXIF Software tag indicates AI generation ({software}).", 40.0
+        if "photoshop" in software or "adobe" in software:
+            return True, f"EXIF Software tag indicates digital editing ({software}).", 20.0
+            
+        return False, "EXIF data appears normal or heavily stripped.", 0.0
+    except Exception as e:
+        return False, f"EXIF analysis failed: {e}", 0.0
+
+
+def _analyze_ela(image_bytes: bytes) -> tuple[bool, str, float]:
+    """Error Level Analysis. Returns (is_suspicious, reason, confidence_boost)."""
+    try:
+        import io
+        import numpy as np
+        from PIL import Image, ImageChops, ImageEnhance
+        
+        # Save at 90% quality
+        original = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        temp_io = io.BytesIO()
+        original.save(temp_io, "JPEG", quality=90)
+        temp_io.seek(0)
+        resaved = Image.open(temp_io).convert("RGB")
+        
+        # Calculate difference
+        ela_image = ImageChops.difference(original, resaved)
+        extrema = ela_image.getextrema()
+        max_diff = max([ex[1] for ex in extrema])
+        if max_diff == 0:
+            max_diff = 1
+        scale = 255.0 / max_diff
+        ela_image = ImageEnhance.Brightness(ela_image).enhance(scale)
+        
+        # Calculate variance
+        ela_array = np.array(ela_image)
+        variance = float(np.var(ela_array))
+        
+        if variance > 1000:  # Arbitrary threshold for high compression variance
+            return True, f"High ELA variance ({variance:.1f}) detected. Possible image splicing or heavy editing.", 15.0
+        return False, f"ELA variance ({variance:.1f}) within normal bounds.", 0.0
+    except Exception as e:
+        return False, f"ELA analysis failed: {e}", 0.0
+
+
 def _analyze_image_with_gemini(image_bytes: bytes) -> dict | None:
     if not config.USE_LLM or not config.GEMINI_API_KEY:
         return None
@@ -130,6 +190,9 @@ Respond with ONLY valid JSON (no markdown):
 
 
 def detect_image(image_bytes: bytes, filename: str | None = None) -> dict:
+    exif_suspicious, exif_reason, exif_boost = _analyze_exif(image_bytes)
+    ela_suspicious, ela_reason, ela_boost = _analyze_ela(image_bytes)
+    
     ai_fake, ai_conf, ai_label = _classify_ai_image(image_bytes)
     caption = _caption_image(image_bytes)
 
@@ -170,6 +233,19 @@ def detect_image(image_bytes: bytes, filename: str | None = None) -> dict:
                 f"AI-image detector ({ai_label}, {ai_conf:.0f}%). {result['reason']}"
             )
             result["model"] = f"{config.MODEL_IMAGE_AI} + {result['model']}"
+
+    # Apply EXIF and ELA findings
+    if exif_suspicious:
+        result["fake"] = True
+        result["confidence"] = min(99.0, result["confidence"] + exif_boost)
+        result["reason"] += f" {exif_reason}"
+        result["labels"].append({"label": "exif-anomaly", "score": exif_boost / 100.0})
+        
+    if ela_suspicious:
+        result["fake"] = True
+        result["confidence"] = min(99.0, result["confidence"] + ela_boost)
+        result["reason"] += f" {ela_reason}"
+        result["labels"].append({"label": "ela-anomaly", "score": ela_boost / 100.0})
 
     if filename:
         result["labels"] = [{"label": "image", "score": 1.0}, *result.get("labels", [])]
