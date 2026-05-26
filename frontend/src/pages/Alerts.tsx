@@ -6,7 +6,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { exportHistoryUrl, fetchHistory } from "@/lib/api";
+import { downloadHistory, fetchHistory } from "@/lib/api";
 import { Link } from "react-router-dom";
 
 function severityFromConfidence(confidence: number, fake: boolean) {
@@ -98,17 +98,13 @@ export default function Alerts() {
             <Button variant="outline" size="sm" onClick={() => refetch()} className="flex-1 sm:flex-none">
               Refresh
             </Button>
-            <Button variant="outline" size="sm" asChild className="flex-1 sm:flex-none">
-              <a href={exportHistoryUrl("json")} download>
-                <Download className="h-4 w-4 sm:mr-1" />
-                <span className="hidden sm:inline">JSON</span>
-              </a>
+            <Button variant="outline" size="sm" onClick={() => downloadHistory("json")} className="flex-1 sm:flex-none">
+              <Download className="h-4 w-4 sm:mr-1" />
+              <span className="hidden sm:inline">JSON</span>
             </Button>
-            <Button variant="outline" size="sm" asChild className="flex-1 sm:flex-none">
-              <a href={exportHistoryUrl("csv")} download>
-                <Download className="h-4 w-4 sm:mr-1" />
-                <span className="hidden sm:inline">CSV</span>
-              </a>
+            <Button variant="outline" size="sm" onClick={() => downloadHistory("csv")} className="flex-1 sm:flex-none">
+              <Download className="h-4 w-4 sm:mr-1" />
+              <span className="hidden sm:inline">CSV</span>
             </Button>
           </div>
         </div>

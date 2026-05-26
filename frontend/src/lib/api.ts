@@ -168,8 +168,30 @@ export function fetchHistory(params?: {
   return request<HistoryResponse>(`/history${qs ? `?${qs}` : ""}`);
 }
 
-export function exportHistoryUrl(format: "json" | "csv" = "json") {
-  return `${API_BASE}/history/export?format=${format}`;
+export async function downloadHistory(format: "json" | "csv" = "json") {
+  const init: RequestInit = {
+    method: "GET",
+    credentials: "include",
+    headers: {},
+  };
+  const tenantId = localStorage.getItem("tenant_id");
+  if (tenantId) {
+    (init.headers as any)["X-Tenant-Id"] = tenantId;
+  }
+  
+  const res = await fetch(`${API_BASE}/history/export?format=${format}`, init);
+  if (!res.ok) {
+    throw new Error("Failed to download file");
+  }
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `legitai-history.${format}`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
 }
 
 export function fetchStats() {
