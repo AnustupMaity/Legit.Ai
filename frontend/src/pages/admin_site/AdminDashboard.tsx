@@ -64,7 +64,7 @@ export default function AdminDashboard() {
   const handleRemove = async (id: string) => {
     const token = localStorage.getItem('access_token');
     try {
-      await fetch(`/api/trainers/${id}`, {
+      await fetch(`/backend/trainers/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -78,7 +78,7 @@ export default function AdminDashboard() {
     const token = localStorage.getItem('access_token');
     const newStatus = t.status === 'Active' ? false : true;
     try {
-      await fetch(`/api/trainers/${t.id}`, {
+      await fetch(`/backend/trainers/${t.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ active: newStatus })
@@ -103,7 +103,7 @@ export default function AdminDashboard() {
     if (editPassword) body.password = editPassword;
     
     try {
-      await fetch(`/api/trainers/${editingId}`, {
+      await fetch(`/backend/trainers/${editingId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(body)

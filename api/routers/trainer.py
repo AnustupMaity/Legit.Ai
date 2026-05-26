@@ -18,7 +18,7 @@ class TrainerUpdateRequest(BaseModel):
     password: Optional[str] = None
     active: Optional[bool] = None
 
-@router.get("/")
+@router.get("")
 def list_trainers(db: Session = Depends(get_db), token_payload=Depends(jwt_auth)):
     if "admin" not in token_payload.get("roles", []):
         raise HTTPException(status_code=403, detail="Admin privileges required")
@@ -37,7 +37,7 @@ def list_trainers(db: Session = Depends(get_db), token_payload=Depends(jwt_auth)
             })
     return trainers
 
-@router.post("/")
+@router.post("")
 def create_trainer(req: TrainerCreateRequest, db: Session = Depends(get_db), token_payload=Depends(jwt_auth)):
     if "admin" not in token_payload.get("roles", []):
         raise HTTPException(status_code=403, detail="Admin privileges required")
