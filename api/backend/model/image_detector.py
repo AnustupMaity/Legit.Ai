@@ -168,7 +168,7 @@ def _analyze_image_with_gemini(image_bytes: bytes) -> dict | None:
         # Gemini 1.5 models support multimodal input
         model_name = config.GEMINI_MODEL
         if not model_name or "gemini" not in model_name:
-            model_name = "gemini-1.5-flash"
+            model_name = "gemini-2.5-flash"
         model = genai.GenerativeModel(model_name)
         
         image = Image.open(io.BytesIO(image_bytes))
@@ -196,31 +196,33 @@ def detect_image(image_bytes: bytes, filename: str | None = None) -> dict:
     ai_fake, ai_conf, ai_label = _classify_ai_image(image_bytes)
     caption = _caption_image(image_bytes)
 
+    local_model_failed = False
+
+    # 1. BASE LOCAL RESULT
     if caption:
         result = detect_text(caption)
         result["model"] = f"{config.MODEL_IMAGE_CAPTION} -> {result['model']}"
         result["reason"] = f'Caption: "{caption[:180]}". {result["reason"]}'
+    elif is_image_model_loaded():
+        result = {
+            "fake": ai_fake,
+            "confidence": ai_conf or 50.0,
+            "reason": "Image analyzed locally (no caption generated).",
+            "model": config.MODEL_IMAGE_CAPTION,
+            "labels": [],
+        }
     else:
-        # Fallback to Gemini if configured
-        gemini_result = _analyze_image_with_gemini(image_bytes)
-        if gemini_result:
-            result = {
-                "fake": gemini_result.get("fake", ai_fake),
-                "confidence": gemini_result.get("confidence", ai_conf or 50.0),
-                "reason": f"Gemini Analysis: {gemini_result.get('reason', 'Analysis completed')}",
-                "model": "gemini-fallback",
-                "labels": [],
-            }
-        else:
-            err_msg = get_image_load_error() or "Unknown error"
-            result = {
-                "fake": ai_fake,
-                "confidence": ai_conf or 50.0,
-                "reason": f"Caption model unavailable. Error: {err_msg}",
-                "model": "fallback",
-                "labels": [],
-            }
+        local_model_failed = True
+        err_msg = get_image_load_error() or "Unknown error"
+        result = {
+            "fake": ai_fake,
+            "confidence": ai_conf or 50.0,
+            "reason": f"Caption model unavailable. Error: {err_msg}",
+            "model": "fallback",
+            "labels": [],
+        }
 
+    # 2. LOCAL AI IMAGE CLASSIFIER
     if ai_label:
         result["labels"] = [
             {"label": f"ai-image:{ai_label}", "score": ai_conf / 100},
@@ -232,9 +234,12 @@ def detect_image(image_bytes: bytes, filename: str | None = None) -> dict:
             result["reason"] = (
                 f"AI-image detector ({ai_label}, {ai_conf:.0f}%). {result['reason']}"
             )
-            result["model"] = f"{config.MODEL_IMAGE_AI} + {result['model']}"
+            if local_model_failed:
+                result["model"] = config.MODEL_IMAGE_AI
+            else:
+                result["model"] = f"{config.MODEL_IMAGE_AI} + {result['model']}"
 
-    # Apply EXIF and ELA findings
+    # 3. EXIF and ELA
     if exif_suspicious:
         result["fake"] = True
         result["confidence"] = min(99.0, result["confidence"] + exif_boost)
@@ -246,6 +251,37 @@ def detect_image(image_bytes: bytes, filename: str | None = None) -> dict:
         result["confidence"] = min(99.0, result["confidence"] + ela_boost)
         result["reason"] += f" {ela_reason}"
         result["labels"].append({"label": "ela-anomaly", "score": ela_boost / 100.0})
+
+    # 4. GEMINI INTEGRATION (Fallback OR Copilot)
+    gemini_result = _analyze_image_with_gemini(image_bytes)
+    if gemini_result:
+        gemini_fake = gemini_result.get("fake", False)
+        gemini_conf = gemini_result.get("confidence", 50.0)
+        gemini_reason = gemini_result.get("reason", "")
+        
+        if local_model_failed:
+            # FALLBACK MODE: Overwrite the ugly error text
+            extra_reason = ""
+            if exif_suspicious:
+                extra_reason += f" {exif_reason}"
+            if ela_suspicious:
+                extra_reason += f" {ela_reason}"
+                
+            result["fake"] = gemini_fake or exif_suspicious or ela_suspicious
+            result["confidence"] = max(result["confidence"], gemini_conf)
+            result["reason"] = f"Gemini Analysis: {gemini_reason}{extra_reason}"
+            result["model"] = "gemini-fallback"
+        else:
+            # COPILOT MODE: Add to existing findings
+            if gemini_fake:
+                result["fake"] = True
+                result["confidence"] = max(result["confidence"], gemini_conf)
+                
+            result["reason"] += f" | Gemini Analysis: {gemini_reason}"
+            if "Gemini" not in result["model"] and "gemini" not in result["model"]:
+                result["model"] += " + Gemini"
+            
+        result["labels"].append({"label": "gemini-analysis", "score": gemini_conf / 100.0})
 
     if filename:
         result["labels"] = [{"label": "image", "score": 1.0}, *result.get("labels", [])]
