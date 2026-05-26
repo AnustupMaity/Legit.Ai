@@ -18,14 +18,12 @@ def load_image_model() -> bool:
     if _caption_pipeline is not None:
         return True
     try:
-        from transformers import pipeline
+        from transformers import BlipProcessor, BlipForConditionalGeneration
 
-        kwargs = {"model": config.MODEL_IMAGE_CAPTION}
-        try:
-            _caption_pipeline = pipeline("image-text-to-text", device=-1, **kwargs)
-        except KeyError:
-            # Fallback for older transformers versions
-            _caption_pipeline = pipeline("image-to-text", device=-1, **kwargs)
+        kwargs = {"pretrained_model_name_or_path": config.MODEL_IMAGE_CAPTION}
+        processor = BlipProcessor.from_pretrained(**kwargs)
+        model = BlipForConditionalGeneration.from_pretrained(**kwargs)
+        _caption_pipeline = {"processor": processor, "model": model}
         _load_error = None
         return True
     except Exception as exc:
@@ -78,14 +76,18 @@ def get_image_load_error() -> str | None:
 def _caption_image(image_bytes: bytes) -> str:
     if not load_image_model() or _caption_pipeline is None:
         return ""
-    image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-    outputs = _caption_pipeline(image)
-    if not outputs:
+    try:
+        image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        processor = _caption_pipeline["processor"]
+        model = _caption_pipeline["model"]
+        
+        inputs = processor(image, return_tensors="pt")
+        out = model.generate(**inputs, max_new_tokens=50)
+        caption = processor.decode(out[0], skip_special_tokens=True)
+        return caption.strip()
+    except Exception as exc:
+        print(f"Captioning error: {exc}")
         return ""
-    first = outputs[0]
-    if isinstance(first, dict):
-        return str(first.get("generated_text", "")).strip()
-    return str(first).strip()
 
 
 def _classify_ai_image(image_bytes: bytes) -> tuple[bool, float, str]:
