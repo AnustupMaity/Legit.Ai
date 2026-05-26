@@ -1,6 +1,10 @@
 import sys
 import os
+import logging
+import warnings
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 from contextlib import asynccontextmanager
 
