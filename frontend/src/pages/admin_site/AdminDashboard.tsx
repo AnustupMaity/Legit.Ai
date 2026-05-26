@@ -149,8 +149,8 @@ export default function AdminDashboard() {
       >
         {/* Classic Window Title Bar */}
         <div className="bg-[#000080] text-white px-2 py-1 flex justify-between items-center font-bold text-sm">
-          <span>Admin Console</span>
-          <div className="flex space-x-1">
+          <span className="truncate pr-2">Admin Console</span>
+          <div className="flex space-x-1 shrink-0">
             <button 
               onClick={() => {
                 localStorage.removeItem('is_admin');
@@ -180,29 +180,29 @@ export default function AdminDashboard() {
             }}
           >
             <h2 className="font-bold mb-3">Create New Trainer</h2>
-            <form onSubmit={handleCreate} className="flex flex-wrap items-end gap-4">
-              <div className="flex flex-col">
+            <form onSubmit={handleCreate} className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-end gap-4">
+              <div className="flex flex-col w-full sm:w-auto sm:flex-1">
                 <label className="mb-1">User ID / Username:</label>
                 <input 
                   value={newUsername}
                   onChange={e => setNewUsername(e.target.value)}
-                  className="bg-white border-t-gray-500 border-l-gray-500 border-b-white border-r-white border-2 px-2 py-1 w-48"
+                  className="bg-white border-t-gray-500 border-l-gray-500 border-b-white border-r-white border-2 px-2 py-1 w-full"
                   required
                 />
               </div>
-              <div className="flex flex-col">
+              <div className="flex flex-col w-full sm:w-auto sm:flex-1">
                 <label className="mb-1">Password:</label>
                 <input 
                   type="password"
                   value={newPassword}
                   onChange={e => setNewPassword(e.target.value)}
-                  className="bg-white border-t-gray-500 border-l-gray-500 border-b-white border-r-white border-2 px-2 py-1 w-48"
+                  className="bg-white border-t-gray-500 border-l-gray-500 border-b-white border-r-white border-2 px-2 py-1 w-full"
                   required
                 />
               </div>
               <button 
                 type="submit"
-                className="px-4 py-1 bg-[#c0c0c0] text-black focus:outline-none"
+                className="px-4 py-1 bg-[#c0c0c0] text-black focus:outline-none w-full sm:w-auto mt-2 sm:mt-0"
                 style={buttonStyle}
                 onMouseDown={handleMouseDown}
                 onMouseUp={handleMouseUp}
@@ -224,7 +224,7 @@ export default function AdminDashboard() {
             }}
           >
             <h2 className="font-bold mb-3">Trainer Management</h2>
-            <div className="bg-white border-t-gray-500 border-l-gray-500 border-b-white border-r-white border-2 h-48 overflow-y-auto p-1">
+            <div className="bg-white border-t-gray-500 border-l-gray-500 border-b-white border-r-white border-2 h-48 overflow-auto p-1">
               {trainers.length === 0 ? (
                 <div className="text-gray-500 p-2">No trainers found.</div>
               ) : (

@@ -37,9 +37,9 @@ const AppContent = () => {
   return (
     <div className="min-h-screen bg-black text-white font-mono uppercase tracking-widest selection:bg-white selection:text-black">
       {!isHome && <Header />}
-      <div className={isHome ? "p-0" : "p-4 space-y-4 border-t-2 border-white"}>
+      <div className={isHome ? "p-0" : "p-2 sm:p-4 space-y-4 border-t-2 border-white overflow-hidden"}>
         {!isHome && <Navigation />}
-        <main className={isHome ? "" : "max-w-7xl mx-auto border-2 border-white p-6"}>
+        <main className={isHome ? "" : "max-w-7xl mx-auto border-2 border-white p-3 sm:p-6 overflow-x-hidden"}>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/main" element={<Dashboard />} />

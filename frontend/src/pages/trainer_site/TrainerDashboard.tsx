@@ -83,8 +83,8 @@ export default function TrainerDashboard(){
       >
         {/* Classic Window Title Bar */}
         <div className="bg-[#000080] text-white px-2 py-1 flex justify-between items-center font-bold text-sm">
-          <span>Trainer Console</span>
-          <div className="flex space-x-1">
+          <span className="truncate pr-2">Trainer Console</span>
+          <div className="flex space-x-1 shrink-0">
             <button 
               onClick={() => {
                 localStorage.removeItem('is_trainer');
@@ -115,17 +115,17 @@ export default function TrainerDashboard(){
           >
             <h2 className="font-bold mb-3">Upload Dataset</h2>
             <p className="mb-2 text-gray-700">Upload dataset (JSON array of {"{text, label}"})</p>
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
               <input 
                 type="file" 
                 aria-label="dataset-file" 
                 accept="application/json" 
                 onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                className="bg-white border-t-gray-500 border-l-gray-500 border-b-white border-r-white border-2 px-1 py-1"
+                className="bg-white border-t-gray-500 border-l-gray-500 border-b-white border-r-white border-2 px-1 py-1 w-full"
               />
               <button 
                 onClick={upload}
-                className="px-4 py-1 bg-[#c0c0c0] text-black focus:outline-none"
+                className="px-4 py-1 bg-[#c0c0c0] text-black focus:outline-none shrink-0"
                 style={buttonStyle}
                 onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
               >
@@ -146,7 +146,7 @@ export default function TrainerDashboard(){
             }}
           >
             <h2 className="font-bold mb-3">Training Jobs & Metrics</h2>
-            <div className="bg-white border-t-gray-500 border-l-gray-500 border-b-white border-r-white border-2 h-64 overflow-y-auto p-1">
+            <div className="bg-white border-t-gray-500 border-l-gray-500 border-b-white border-r-white border-2 h-64 overflow-auto p-1">
               {jobs.length === 0 ? (
                 <div className="text-gray-500 p-2">No training jobs found.</div>
               ) : (

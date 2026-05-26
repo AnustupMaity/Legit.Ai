@@ -208,14 +208,14 @@ export default function Detect() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-end border-b-2 border-white pb-2 mb-2">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b-2 border-white pb-4 mb-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-widest uppercase">&gt; CONTENT.DETECTION</h1>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-widest uppercase">&gt; CONTENT.DETECTION</h1>
           <p className="text-gray-400 text-xs tracking-widest uppercase mt-1">
-            Text, URL, batch, or image — ML ensemble + optional Gemini (free mode: USE_LLM=false)
+            Text, URL, batch, or image — ML ensemble + optional Gemini
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={resetState} className="bg-black text-white hover:bg-white hover:text-black border-2 border-white uppercase tracking-widest rounded-none">
+        <Button variant="outline" size="sm" onClick={resetState} className="w-full sm:w-auto bg-black text-white hover:bg-white hover:text-black border-2 border-white uppercase tracking-widest rounded-none">
           [ RESET ]
         </Button>
       </div>

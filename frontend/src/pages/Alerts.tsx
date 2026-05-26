@@ -64,25 +64,25 @@ export default function Alerts() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4 border-b-2 border-white pb-4 mb-4">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 border-b-2 border-white pb-4 mb-4">
         <div>
-          <h1 className="text-2xl font-bold uppercase tracking-widest">&gt; DETECTION.HISTORY</h1>
+          <h1 className="text-xl sm:text-2xl font-bold uppercase tracking-widest">&gt; DETECTION.HISTORY</h1>
           <p className="text-gray-400 text-xs uppercase tracking-widest mt-1">
             {data?.total ?? 0} total scans · {fakeCount} flagged
           </p>
         </div>
-        <div className="flex items-center space-x-2">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2">
+          <div className="relative flex-1 sm:flex-none">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 w-64"
+              className="pl-9 w-full sm:w-64"
             />
           </div>
           <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-full sm:w-32">
               <Filter className="h-4 w-4 mr-2" />
               <SelectValue />
             </SelectTrigger>
@@ -94,21 +94,23 @@ export default function Alerts() {
               <SelectItem value="low">Low</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" size="sm" onClick={() => refetch()}>
-            Refresh
-          </Button>
-          <Button variant="outline" size="sm" asChild>
-            <a href={exportHistoryUrl("json")} download>
-              <Download className="h-4 w-4 mr-1" />
-              JSON
-            </a>
-          </Button>
-          <Button variant="outline" size="sm" asChild>
-            <a href={exportHistoryUrl("csv")} download>
-              <Download className="h-4 w-4 mr-1" />
-              CSV
-            </a>
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => refetch()} className="flex-1 sm:flex-none">
+              Refresh
+            </Button>
+            <Button variant="outline" size="sm" asChild className="flex-1 sm:flex-none">
+              <a href={exportHistoryUrl("json")} download>
+                <Download className="h-4 w-4 sm:mr-1" />
+                <span className="hidden sm:inline">JSON</span>
+              </a>
+            </Button>
+            <Button variant="outline" size="sm" asChild className="flex-1 sm:flex-none">
+              <a href={exportHistoryUrl("csv")} download>
+                <Download className="h-4 w-4 sm:mr-1" />
+                <span className="hidden sm:inline">CSV</span>
+              </a>
+            </Button>
+          </div>
         </div>
       </div>
 
