@@ -51,11 +51,9 @@ def load_text_model() -> bool:
         from transformers import pipeline
 
         kwargs = {"model": config.MODEL_TEXT}
-        if config.HF_TOKEN:
-            kwargs["token"] = config.HF_TOKEN
         _text_pipeline = pipeline(
             "text-classification",
-            device=config.DEVICE,
+            device=-1,
             **kwargs,
             truncation=True,
             max_length=512,
@@ -77,11 +75,9 @@ def load_enhanced_model() -> bool:
         from transformers import pipeline
 
         kwargs = {"model": config.MODEL_TEXT_ENHANCED}
-        if config.HF_TOKEN:
-            kwargs["token"] = config.HF_TOKEN
         _enhanced_pipeline = pipeline(
             "text-classification",
-            device=config.DEVICE,
+            device=-1,
             **kwargs,
             truncation=True,
             max_length=512,
@@ -226,7 +222,10 @@ def _classify(text: str) -> tuple[bool, float, str, str, list[dict]]:
         except Exception as exc:
             print(f"Zero-shot classification failed: {exc}")
 
+    print(f"DEBUG TRACE: load_enhanced={_enhanced_pipeline is not None}, load_text={_text_pipeline is not None}, enhanced_fake={enhanced_fake}")
+    
     if not load_text_model() or _text_pipeline is None:
+        print(f"DEBUG TRACE: ENTERING TEXT PIPELINE FAIL BLOCK. enhanced_fake={enhanced_fake}")
         # Use only enhanced model if base failed
         if enhanced_fake is not None:
             fake, confidence, reason, signals = _ensemble(
@@ -247,9 +246,12 @@ def _classify(text: str) -> tuple[bool, float, str, str, list[dict]]:
         if zero_shot_suspicious:
             labels.append({"label": "zero-shot-suspicious", "score": 0.7})
         
+        print(f"DEBUG TRACE: RETURNING FROM TEXT PIPELINE FAIL BLOCK. model_used={model_used}")
         return fake, confidence, reason, model_used, labels
 
+    print(f"DEBUG TRACE: EXECUTING _text_pipeline")
     results = _text_pipeline(text[:5000])
+    print(f"DEBUG TRACE: _text_pipeline results={results}")
     if not results:
         if enhanced_fake is not None:
             fake, confidence, reason, signals = _ensemble(

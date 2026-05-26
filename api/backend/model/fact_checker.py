@@ -23,7 +23,7 @@ def load_embedding_model() -> bool:
         return True
     
     try:
-        _embedding_model = SentenceTransformer('all-MiniLM-L6-v2', device=config.DEVICE_STR)
+        _embedding_model = SentenceTransformer('all-MiniLM-L6-v2', device="cpu")
         _load_error = None
         return True
     except Exception as exc:

@@ -21,9 +21,7 @@ def load_image_model() -> bool:
         from transformers import pipeline
 
         kwargs = {"model": config.MODEL_IMAGE_CAPTION}
-        if config.HF_TOKEN:
-            kwargs["token"] = config.HF_TOKEN
-        _caption_pipeline = pipeline("image-to-text", device=config.DEVICE, **kwargs)
+        _caption_pipeline = pipeline("image-to-text", device=-1, **kwargs)
         _load_error = None
         return True
     except Exception as exc:
@@ -42,9 +40,7 @@ def load_ai_image_classifier() -> bool:
         from transformers import pipeline
 
         kwargs = {"model": config.MODEL_IMAGE_AI}
-        if config.HF_TOKEN:
-            kwargs["token"] = config.HF_TOKEN
-        _ai_image_pipeline = pipeline("image-classification", device=config.DEVICE, **kwargs)
+        _ai_image_pipeline = pipeline("image-classification", device=-1, **kwargs)
         _ai_load_error = None
         return True
     except Exception as exc:
@@ -53,7 +49,7 @@ def load_ai_image_classifier() -> bool:
         # Fallback to original model if enhanced model fails
         try:
             kwargs["model"] = "umm-maybe/AI-image-detector"
-            _ai_image_pipeline = pipeline("image-classification", device=config.DEVICE, **kwargs)
+            _ai_image_pipeline = pipeline("image-classification", device=-1, **kwargs)
             _ai_load_error = None
             return True
         except Exception as fallback_exc:
