@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "https://anustupmaity-legit-ai-backend.hf.space/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
