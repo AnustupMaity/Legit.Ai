@@ -33,13 +33,13 @@ function ResultCard({ result }: { result: DetectionResult }) {
   return (
     <Card className={`relative overflow-hidden transition-all duration-500 ${isFake ? 'animate-glitch border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.2)]' : 'border-green-500/30'}`}>
       <CardHeader className="border-b border-white/10 pb-2 mb-2 bg-black/40">
-        <CardTitle className="flex items-center gap-2 tracking-widest text-sm uppercase">
+        <CardTitle className="flex items-center gap-2 tracking-widest text-sm sm:text-base uppercase break-all sm:break-normal">
           {isFake ? (
-            <AlertTriangle className="h-5 w-5 text-red-500 animate-pulse" />
+            <AlertTriangle className="h-5 w-5 shrink-0 text-red-500 animate-pulse" />
           ) : (
-            <Shield className="h-5 w-5 text-green-400" />
+            <Shield className="h-5 w-5 shrink-0 text-green-400" />
           )}
-          &gt; RESULT.OUTPUT
+          <span>&gt; RESULT.OUTPUT</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6 pt-4">
@@ -65,15 +65,19 @@ function ResultCard({ result }: { result: DetectionResult }) {
           </div>
 
           <div className="flex-1 space-y-4 w-full">
-            <div className="flex flex-wrap items-center gap-3">
-              <StatusBadge variant={isFake ? "danger" : "safe"}>
-                {isFake ? "Likely misinformation" : "Likely authentic"}
-              </StatusBadge>
-              {result.cached && <StatusBadge variant="info" size="sm">Cached</StatusBadge>}
-              <span className="text-xs text-muted-foreground uppercase tracking-widest">ID: {result.id ?? "—"}</span>
-              {result.latency_ms != null && (
-                <span className="text-xs text-muted-foreground uppercase tracking-widest">{result.cached ? "Instant" : `${result.latency_ms} ms`}</span>
-              )}
+            <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusBadge variant={isFake ? "danger" : "safe"}>
+                  {isFake ? "Likely misinformation" : "Likely authentic"}
+                </StatusBadge>
+                {result.cached && <StatusBadge variant="info" size="sm">Cached</StatusBadge>}
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs text-muted-foreground uppercase tracking-widest">ID: {result.id ?? "—"}</span>
+                {result.latency_ms != null && (
+                  <span className="text-xs text-muted-foreground uppercase tracking-widest">{result.cached ? "Instant" : `${result.latency_ms} ms`}</span>
+                )}
+              </div>
             </div>
             
             <div className="bg-white/5 p-4 rounded-md border border-white/10">

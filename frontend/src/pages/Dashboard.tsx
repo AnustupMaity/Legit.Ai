@@ -103,8 +103,8 @@ export default function Dashboard() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2 text-xl tracking-widest border-b-2 border-white pb-2">
-            <Activity className="h-5 w-5 text-white animate-pulse" />
+          <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl tracking-widest border-b-2 border-white pb-2">
+            <Activity className="h-5 w-5 shrink-0 text-white animate-pulse" />
             <span>&gt; DETECTION.ACTIVITY</span>
           </CardTitle>
         </CardHeader>
@@ -150,12 +150,12 @@ export default function Dashboard() {
       </Card>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between border-b-2 border-white pb-2">
-          <CardTitle className="flex items-center space-x-2 tracking-widest">
-            <AlertTriangle className="h-5 w-5" />
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b-2 border-white pb-4">
+          <CardTitle className="flex items-center space-x-2 tracking-widest text-lg sm:text-xl">
+            <AlertTriangle className="h-5 w-5 shrink-0" />
             <span>&gt; RECENT.LOGS</span>
           </CardTitle>
-          <Button variant="outline" size="sm" asChild className="bg-black border-2 border-white text-white hover:bg-white hover:text-black rounded-none">
+          <Button variant="outline" size="sm" asChild className="w-full sm:w-auto bg-black border-2 border-white text-white hover:bg-white hover:text-black rounded-none">
             <Link to="/alerts">[ VIEW.ALL ]</Link>
           </Button>
         </CardHeader>
