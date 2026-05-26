@@ -41,6 +41,31 @@ const Index = () => {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black text-white p-3 font-mono">
 
+      {/* CINEMATIC NOISE */}
+      <div 
+        className="absolute inset-0 z-0 opacity-[0.04] mix-blend-overlay pointer-events-none"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        }}
+      ></div>
+
+      {/* VERCEL-STYLE BRAND BADGE */}
+      <div className="absolute top-6 left-6 sm:top-8 sm:left-8 flex items-center gap-3 z-50 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] hover:scale-105 transition-transform duration-300 cursor-default">
+        <svg viewBox="0 0 100 100" className="w-6 h-6 sm:w-7 sm:h-7">
+          <polygon points="50,20 80,75 20,75" fill="white" />
+        </svg>
+        <span className="font-bold text-lg sm:text-xl tracking-[0.2em] text-white">L.AI</span>
+      </div>
+
+      {/* LIVE INDICATOR */}
+      <div className="absolute top-6 right-6 sm:top-8 sm:right-8 flex items-center gap-2.5 z-50 px-3 py-1.5 border border-red-500/30 bg-red-500/5 rounded-full backdrop-blur-sm">
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]"></span>
+        </span>
+        <span className="text-[9px] sm:text-[10px] font-bold tracking-[0.25em] text-red-500/90 uppercase">SYSTEM LIVE</span>
+      </div>
+
       {/* GRID BACKGROUND */}
       <div className="absolute inset-0 opacity-20">
         <div
@@ -79,7 +104,7 @@ const Index = () => {
       </div>
 
       {/* MAIN CONTAINER */}
-      <div className="relative z-10 w-full max-w-4xl border border-white/15 bg-black/70 backdrop-blur-md px-6 sm:px-9 py-7 overflow-hidden shadow-[0_0_45px_rgba(255,255,255,0.06)]">
+      <div className="relative z-10 w-full max-w-4xl border border-white/15 bg-black/70 backdrop-blur-md px-6 sm:px-9 py-7 overflow-hidden shadow-[0_0_45px_rgba(255,255,255,0.06)] animate-floatCard">
 
         {/* MOVING BORDER LIGHT */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -162,7 +187,7 @@ const Index = () => {
 
             <button
               onClick={start}
-              className="group relative inline-flex items-center justify-center overflow-hidden border border-white bg-white px-9 sm:px-11 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] text-black transition-all duration-300 hover:scale-110 hover:bg-transparent hover:text-white animate-throb shadow-[0_0_25px_rgba(255,255,255,0.35)]"
+              className="group relative inline-flex items-center justify-center overflow-hidden border border-white bg-white px-9 sm:px-11 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] hover:tracking-[0.15em] text-black transition-all duration-500 hover:scale-[1.03] hover:bg-black hover:text-white hover:border-white shadow-[0_0_25px_rgba(255,255,255,0.35)] hover:shadow-[0_0_50px_rgba(255,255,255,0.7),inset_0_0_20px_rgba(255,255,255,0.4)]"
             >
 
               {/* BUTTON LIGHT SWEEP */}
@@ -171,7 +196,7 @@ const Index = () => {
               </span>
 
               {/* BUTTON GLOW */}
-              <span className="absolute inset-0 border border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.45)] animate-pulse"></span>
+              <span className="absolute inset-0 border border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.45)] group-hover:animate-ping opacity-50"></span>
 
               <span className="relative z-10">
                 [ INITIALIZE ]
@@ -301,6 +326,15 @@ const Index = () => {
 
         .animate-borderMoveYReverse {
           animation: borderMoveYReverse 4s linear infinite;
+        }
+
+        @keyframes floatCard {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-8px); }
+        }
+
+        .animate-floatCard {
+          animation: floatCard 6s ease-in-out infinite;
         }
       `}</style>
     </div>

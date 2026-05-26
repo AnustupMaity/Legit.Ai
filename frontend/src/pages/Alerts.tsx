@@ -164,7 +164,7 @@ export default function Alerts() {
               <p>{alert.description}</p>
               <div className="flex items-center space-x-1 text-sm text-muted-foreground">
                 <Clock className="h-4 w-4" />
-                <span>{new Date(alert.timestamp).toLocaleString()}</span>
+                <span>{new Date(alert.timestamp.endsWith('Z') ? alert.timestamp : alert.timestamp + 'Z').toLocaleString()}</span>
               </div>
             </CardContent>
           </Card>

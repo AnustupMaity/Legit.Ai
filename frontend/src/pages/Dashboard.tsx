@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { fetchHistory, fetchStats } from "@/lib/api";
 
 function formatTimeAgo(iso: string) {
-  const diff = Date.now() - new Date(iso).getTime();
+  const utcIso = iso.endsWith('Z') ? iso : `${iso}Z`;
+  const diff = Date.now() - new Date(utcIso).getTime();
   const mins = Math.floor(diff / 60000);
   if (mins < 60) return `${mins} min ago`;
   const hrs = Math.floor(mins / 60);

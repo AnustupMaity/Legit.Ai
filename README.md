@@ -2,149 +2,166 @@
   <a href="https://legitai-app.vercel.app/" target="_blank">
     <img src="https://img.shields.io/badge/Deployed_on-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Deployed on Vercel">
   </a>
-  <img src="https://img.shields.io/badge/Status-Active-success?style=for-the-badge" alt="Status">
-  <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="License">
-  
+  <img src="https://img.shields.io/badge/Backend-Hugging_Face-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black" alt="Hugging Face">
+  <img src="https://img.shields.io/badge/Database-Neon_Postgres-00E599?style=for-the-badge&logo=postgresql&logoColor=black" alt="Neon Postgres">
+  <br/>
+  <br/>
   <h1>🛡️ Legit.ai</h1>
   <p><b>Advanced AI-Powered Misinformation & Deepfake Detection Platform</b></p>
 </div>
 
+---
 
 ## 📖 Overview
 
-Legit.ai is a privacy-first, fully-featured platform designed to detect potentially misleading text, images, and audio using a **hybrid Machine Learning stack**. 
+Legit.ai is a privacy-first, fully-featured platform designed to detect potentially misleading text, images, audio, and video using a **hybrid Machine Learning stack**. 
 
-It provides a seamless, "iLovePDF-style" public detection portal for users, and a deeply secured JWT-authenticated dashboard for Admins and AI Trainers to manage the system and track metrics.
+It provides a seamless, cinematic public detection portal with deepfake analysis for users, alongside a highly secured JWT-authenticated dashboard for Admins and AI Trainers to manage the system and track telemetry.
+
+---
 
 ## ✨ Key Features
 
 - **🌐 Browser-Isolated Sessions:** Public users can scan content anonymously without an account. All histories are tied to local browser sessions.
-- **🧹 24-Hour Auto-Scrubbing:** Privacy is prioritized. A background worker securely deletes all scanned records older than 24 hours.
-- **🤖 Ensemble ML Pipeline:** Utilizes offline Hugging Face classifiers for text, zero-shot categorizations, and deepfake image detection.
-- **🧠 LLM Explainer:** Integrates with Google Gemini (optional) to provide human-readable explanations for *why* content was flagged as misinformation.
-- **🔒 Secure Admin/Trainer Portal:** Fully protected backend routes with JWT (JSON Web Tokens), role-based access control, and hashed passwords via `passlib`.
+- **🧹 24-Hour Auto-Scrubbing:** Privacy is prioritized. A background worker securely deletes all scanned records older than 24 hours from the database.
+- **🤖 Ensemble ML Pipeline:** Utilizes offline Hugging Face classifiers for text, zero-shot categorizations, and deepfake image/audio/video detection.
+- **🧠 LLM Explainer:** Integrates with Google Gemini to provide human-readable explanations for *why* content was flagged as misinformation.
+- **🗄️ Serverless PostgreSQL:** Powered by NeonDB to ensure robust, persistent data storage that easily survives server restarts.
 - **⚡ GPU Acceleration:** Automatically detects and utilizes CUDA-compatible GPUs for rapid model inference, falling back to CPU gracefully.
 
 ---
 
-## 🏗️ Architecture Flowchart
+## 🏗️ Architecture & Deployment Topology
+
+To maximize performance while remaining completely free to host, Legit.ai splits its architecture across three cloud providers:
 
 ```mermaid
 graph TD
-    subgraph Frontend - React/Vite
-        A[Public User Portal]
-        B[Admin / Trainer Dashboard]
-        note1[Unified Single Deployment]
+    subgraph "Frontend Layer (Vercel)"
+        A[React SPA / Vite UI]
+        B[Trainer/Admin Dashboard]
     end
 
-    subgraph Backend - FastAPI
-        C[Rate Limiter & Middleware]
-        D[JWT Auth & Role Management]
-        E[Background Cleanup Worker]
+    subgraph "Backend Layer (Hugging Face Docker Space)"
+        C[FastAPI Core Router]
+        D[JWT Auth & Rate Limiter]
         
-        subgraph ML Pipeline
-            F[Text Classification Models]
-            G[Deepfake Image/Audio Models]
-            H[Google Gemini Integration]
+        subgraph "Machine Learning Ensemble"
+            F[Text Transformers]
+            G[Image/Audio/Video Deepfake Models]
+            H[Gemini Explainer API]
         end
-        
-        I[(SQLite Database)]
     end
 
-    A -->|Unauthenticated Requests| C
-    B -->|JWT Authenticated| C
+    subgraph "Persistence Layer (Neon Serverless)"
+        I[(PostgreSQL Database)]
+        E[Background Auto-Scrubber]
+    end
+
+    A <-->|REST API| C
+    B <-->|JWT Authenticated| C
     
-    C --> D
-    D --> F
-    D --> G
-    D --> H
+    C <--> D
+    D <--> F
+    D <--> G
+    D <--> H
     
-    D <--> I
+    C <-->|SQLAlchemy ORM| I
     E -.->|Purge 24h old data| I
 ```
+
+### 🗄️ The Database (Neon PostgreSQL)
+Initially built on SQLite, Legit.ai was upgraded to a remote **Neon Serverless PostgreSQL** database. Because Hugging Face Spaces can occasionally shut down or restart (wiping local filesystem states), connecting to a remote Neon database ensures that all analytics, tenant records, and detection histories remain completely permanent and resilient.
 
 ---
 
 ## 🚀 Tech Stack
 
-- **Backend:** Python 3.10+, FastAPI, Uvicorn, SQLAlchemy, Celery
+- **Backend:** Python 3.10+, FastAPI, Uvicorn, SQLAlchemy, psycopg2-binary
 - **Machine Learning:** PyTorch (CUDA supported), Transformers, Hugging Face `pipeline`
-- **Frontend:** React, Vite, TypeScript, Tailwind CSS, shadcn-ui, React Router
+- **Frontend:** React, Vite, TypeScript, Tailwind CSS, shadcn-ui, Framer Motion
 - **Security:** bcrypt password hashing, HTTPOnly JWT Tokens
 
 ---
 
-## 💻 Getting Started
+## 💻 Local Development Setup
 
 ### 1. Backend (API) Setup
 
-```sh
+From the **root project folder**, initialize your virtual environment:
+
+```powershell
+# Create and activate environment
 cd api
 python -m venv venv
-# Windows: venv\Scripts\activate
-# Linux/Mac: source venv/bin/activate
+.\venv\Scripts\activate   # (Windows)
+# source venv/bin/activate # (Mac/Linux)
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
 **Configure Environment:**
-Copy the template and fill in optional API keys:
-```sh
+Copy the template and fill in your API keys (and your Neon `DATABASE_URL`):
+```powershell
 cp .env.example .env
 ```
-*(Note: Never commit your `.env` file to version control. The `.gitignore` is already configured to hide it).*
+*(Note: Never commit your `.env` file to version control).*
 
 **Start the Server:**
-```sh
-python -m uvicorn main:app --port 8000
+You must run the server from the **root directory** (not the `api` folder) to ensure module imports resolve correctly:
+```powershell
+cd ..  # Move back to root directory
+python -m uvicorn api.main:app --port 8000
 ```
-- API is available at: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+- API available at: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 - Swagger Docs: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
-*The first request may be slow as the system downloads the required Hugging Face model weights.*
+*Note: The very first API request may take time as the system downloads the required Hugging Face model weights locally to `api/models/`.*
 
-### 2. Frontend Setup (Public & Admin Portals)
+### 2. Frontend Setup
 
-The public portal and the admin dashboard are unified into a single React application for easy deployment.
+In a new terminal window, boot the React UI:
 
-```sh
+```powershell
 cd frontend
 npm install
 npm run dev -- --port 3000
 ```
-- **Public UI is available at:** [http://localhost:3000](http://localhost:3000)
-- **Admin Portal is available at:** [http://localhost:3000/admin-site/login](http://localhost:3000/admin-site/login)
-
-*(On first backend startup, a default admin account is automatically provisioned. Username: `admin`, Password: `adminpass`. It is highly recommended to change this in production).*
+- **Detection Portal:** [http://localhost:3000](http://localhost:3000)
+- **Admin Portal:** [http://localhost:3000/admin-site/login](http://localhost:3000/admin-site/login)
 
 ---
 
-## ☁️ Deployment
+## ☁️ Deployment Guide
 
-Legit.ai can be deployed completely for free! 
-- **Backend**: Deploy the `huggingfaceuploads/` folder to a **Hugging Face Docker Space** (gives 16GB RAM for ML models).
-- **Frontend**: Deploy the `frontend/` folder to **Vercel**.
-*(Detailed deployment instructions are available in `deployment_guide.md`).*
+Legit.ai is designed to be deployed for **free**:
+
+1. **Database:** 
+   - Create a free cluster on [Neon.tech](https://neon.tech/).
+   - Copy the connection string (`postgresql://...`).
+2. **Backend (Hugging Face Space):**
+   - Create a Hugging Face Docker space.
+   - Upload the contents of your `api/` directory.
+   - In Settings -> Variables and Secrets, add your `DATABASE_URL` secret.
+   - The Space will install `psycopg2-binary` and auto-migrate all database tables on boot.
+3. **Frontend (Vercel):**
+   - Connect your GitHub repo to Vercel.
+   - Set the root directory to `frontend/`.
+   - Vercel will automatically build and deploy the React interface globally.
 
 ---
 
-## ⚙️ Environment Variables (`api/.env`)
+## ⚙️ Environment Variables
 
 | Variable | Description |
 |----------|-------------|
-| `GEMINI_API_KEY` | Google Gemini API Key for human-readable explanations (optional) |
+| `DATABASE_URL` | Neon PostgreSQL connection string (`postgresql://...`) |
+| `GEMINI_API_KEY` | Google Gemini API Key for human-readable explanations |
 | `HF_TOKEN` | Hugging Face token for gated models (optional) |
 | `USE_LLM` | `true` / `false` — enable Gemini explanations |
 | `EAGER_LOAD_MODELS` | `true` to load ML models immediately on server startup |
-| `MODEL_TEXT` | HF text model string (default: bert-tiny fake news) |
 | `CACHE_ENABLED` | `true` to cache identical analysis requests |
-| `RATE_LIMIT_PER_MINUTE` | Per-IP rate limiting integer |
-
----
-
-## 🔒 Security & Privacy Notes
-
-- **Credentials:** Default admin credentials are automatically created but should be altered immediately.
-- **Git Hooks:** All `.env`, `*.pem`, `*.key`, and SQLite `*.db` files are strictly ignored by Git to prevent accidental credential leakage.
 
 ## 📄 License
 MIT License

@@ -27,45 +27,65 @@ import { loadLocalSettings } from "@/lib/settings";
 import { useToast } from "@/hooks/use-toast";
 
 function ResultCard({ result }: { result: DetectionResult }) {
+  const authScore = result.fake ? 100 - result.confidence : result.confidence;
+  const isFake = result.fake;
+
   return (
-    <Card>
-      <CardHeader className="border-b-2 border-dashed border-white pb-2 mb-2">
-        <CardTitle className="flex items-center gap-2 tracking-widest">
-          {result.fake ? (
-            <AlertTriangle className="h-5 w-5 text-red-500" />
+    <Card className={`relative overflow-hidden transition-all duration-500 ${isFake ? 'animate-glitch border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.2)]' : 'border-green-500/30'}`}>
+      <CardHeader className="border-b border-white/10 pb-2 mb-2 bg-black/40">
+        <CardTitle className="flex items-center gap-2 tracking-widest text-sm uppercase">
+          {isFake ? (
+            <AlertTriangle className="h-5 w-5 text-red-500 animate-pulse" />
           ) : (
-            <Shield className="h-5 w-5 text-white" />
+            <Shield className="h-5 w-5 text-green-400" />
           )}
           &gt; RESULT.OUTPUT
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <StatusBadge variant={result.fake ? "danger" : "safe"}>
-            {result.fake ? "Likely misinformation" : "Likely authentic"}
-          </StatusBadge>
-          {result.cached && (
-            <StatusBadge variant="info" size="sm">
-              Cached
-            </StatusBadge>
-          )}
-          <span className="text-sm text-muted-foreground">ID: {result.id ?? "—"}</span>
-          {result.latency_ms != null && (
-            <span className="text-sm text-muted-foreground">
-              {result.cached ? "Instant" : `${result.latency_ms} ms`}
-            </span>
-          )}
-        </div>
-        <div className="space-y-1">
-          <div className="flex justify-between text-sm">
-            <span>Confidence</span>
-            <span>{result.confidence.toFixed(1)}%</span>
+      <CardContent className="space-y-6 pt-4">
+        <div className="flex flex-col md:flex-row items-center gap-8">
+          
+          {/* AUTHENTICITY SCORE GAUGE */}
+          <div className="relative flex items-center justify-center w-36 h-36 shrink-0">
+            <svg className="w-full h-full transform -rotate-90 drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-white/10" />
+              <circle 
+                cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" 
+                strokeDasharray={`${2 * Math.PI * 40}`} 
+                strokeDashoffset={`${2 * Math.PI * 40 * (1 - authScore / 100)}`}
+                className={`transition-all duration-1500 ease-out ${isFake ? 'text-red-500' : 'text-green-500'}`} 
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className={`text-3xl font-black tracking-tighter ${isFake ? 'text-red-500' : 'text-green-500'}`}>
+                {authScore.toFixed(0)}%
+              </span>
+              <span className="text-[9px] uppercase tracking-widest text-gray-400 mt-1">Authentic</span>
+            </div>
           </div>
-          <Progress value={result.confidence} className="h-2" />
+
+          <div className="flex-1 space-y-4 w-full">
+            <div className="flex flex-wrap items-center gap-3">
+              <StatusBadge variant={isFake ? "danger" : "safe"}>
+                {isFake ? "Likely misinformation" : "Likely authentic"}
+              </StatusBadge>
+              {result.cached && <StatusBadge variant="info" size="sm">Cached</StatusBadge>}
+              <span className="text-xs text-muted-foreground uppercase tracking-widest">ID: {result.id ?? "—"}</span>
+              {result.latency_ms != null && (
+                <span className="text-xs text-muted-foreground uppercase tracking-widest">{result.cached ? "Instant" : `${result.latency_ms} ms`}</span>
+              )}
+            </div>
+            
+            <div className="bg-white/5 p-4 rounded-md border border-white/10">
+              <p className="text-sm font-medium tracking-wide leading-relaxed">{result.reason}</p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-3 opacity-60">Model: {result.model}</p>
+            </div>
+          </div>
         </div>
-        <p className="text-sm">{result.reason}</p>
-        <p className="text-xs text-muted-foreground">Model: {result.model}</p>
       </CardContent>
+      {isFake && (
+        <div className="absolute inset-0 bg-red-500/5 mix-blend-overlay pointer-events-none"></div>
+      )}
     </Card>
   );
 }
@@ -78,6 +98,7 @@ export default function Detect() {
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<DetectionResult | null>(null);
   const [batchResults, setBatchResults] = useState<DetectionResult[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
   const { toast } = useToast();
 
   const resetState = () => {
@@ -157,12 +178,32 @@ export default function Detect() {
     urlMutation.isPending ||
     batchMutation.isPending;
 
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    if (!f) return;
+  const processFile = (f: File) => {
     setFile(f);
     setPreview(URL.createObjectURL(f));
     setResult(null);
+  };
+
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (f) processFile(f);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+  
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+  
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const f = e.dataTransfer.files?.[0];
+    if (f) processFile(f);
   };
 
   return (
@@ -262,31 +303,65 @@ export default function Detect() {
         </TabsContent>
 
         <TabsContent value="image">
-          <Card>
-            <CardHeader>
-              <CardTitle>Upload an image</CardTitle>
+          <Card className="relative overflow-hidden border-white/10">
+            {loading && (
+              <div className="absolute inset-0 z-50 pointer-events-none overflow-hidden bg-black/40 backdrop-blur-[1px]">
+                <div className="w-full h-[2px] bg-cyan-400 shadow-[0_0_20px_rgba(34,211,238,1)] absolute animate-scan"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="px-6 py-2 bg-black/90 border border-cyan-400/50 text-cyan-400 text-xs tracking-[0.3em] font-bold uppercase animate-pulse shadow-[0_0_15px_rgba(34,211,238,0.2)]">
+                    Scanning Content...
+                  </span>
+                </div>
+              </div>
+            )}
+            <CardHeader className="bg-white/5 border-b border-white/10">
+              <CardTitle className="tracking-widest uppercase text-sm text-gray-300">Upload Media</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif"
-                onChange={onFileChange}
-                className="block w-full text-sm"
-              />
-              {preview && (
-                <img
-                  src={preview}
-                  alt="Preview"
-                  className="max-h-64 rounded-lg border object-contain"
+            <CardContent className="space-y-6 pt-6">
+              
+              {/* DRAG AND DROP ZONE */}
+              <label 
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`flex flex-col items-center justify-center w-full min-h-[200px] border-2 border-dashed rounded-xl cursor-pointer transition-all duration-300 ${isDragging ? 'border-cyan-400 bg-cyan-400/10 scale-[1.02] shadow-[0_0_30px_rgba(34,211,238,0.15)]' : 'border-white/20 bg-black hover:bg-white/5 hover:border-white/40'}`}
+              >
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <Upload className={`w-10 h-10 mb-4 transition-all duration-300 ${isDragging ? 'text-cyan-400 animate-bounce' : 'text-gray-500'}`} />
+                  <p className="mb-2 text-sm text-gray-400 tracking-widest"><span className="font-semibold text-white">Click to upload</span> or drag and drop</p>
+                  <p className="text-[10px] text-gray-600 uppercase tracking-[0.2em]">Image or Audio (MAX. 50MB)</p>
+                </div>
+                <input
+                  type="file"
+                  accept="image/*,audio/*,video/*"
+                  onChange={onFileChange}
+                  className="hidden"
                 />
+              </label>
+
+              {preview && (
+                <div className="relative mt-4 group rounded-xl overflow-hidden border border-white/20 bg-black/50 p-2">
+                  <img
+                    src={preview}
+                    alt="Preview"
+                    className="max-h-64 rounded-lg object-contain w-full drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-opacity duration-300 group-hover:opacity-80"
+                  />
+                  {/* Subtle scanline overlay on preview */}
+                  <div className="absolute inset-0 pointer-events-none opacity-20 bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_4px]"></div>
+                </div>
               )}
-              <Button disabled={!file || loading} onClick={() => imageMutation.mutate()}>
+
+              <Button 
+                disabled={!file || loading} 
+                onClick={() => imageMutation.mutate()}
+                className="w-full py-7 uppercase tracking-[0.2em] font-bold bg-white text-black hover:bg-gray-200 transition-all duration-300 hover:scale-[1.01] shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+              >
                 {loading ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="h-5 w-5 mr-3 animate-spin" />
                 ) : (
-                  <Upload className="h-4 w-4 mr-2" />
+                  <Search className="h-5 w-5 mr-3" />
                 )}
-                Analyze image
+                Run Deepfake Analysis
               </Button>
             </CardContent>
           </Card>
@@ -296,13 +371,37 @@ export default function Detect() {
       {result && <ResultCard result={result} />}
 
       {batchResults.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-lg font-medium">Batch results ({batchResults.length})</h2>
+        <div className="space-y-4 mt-8">
+          <h2 className="text-xs text-gray-400 uppercase tracking-[0.3em] mb-4">Batch results ({batchResults.length})</h2>
           {batchResults.map((r) => (
             <ResultCard key={r.id ?? Math.random()} result={r} />
           ))}
         </div>
       )}
+
+      {/* CUSTOM ANIMATIONS */}
+      <style>{`
+        @keyframes scan {
+          0% { top: 0; opacity: 0; }
+          10% { opacity: 1; }
+          90% { opacity: 1; }
+          100% { top: 100%; opacity: 0; }
+        }
+        .animate-scan {
+          animation: scan 1.5s ease-in-out infinite;
+        }
+        @keyframes glitch {
+          0%, 90% { transform: translate(0); filter: none; }
+          92% { transform: translate(-3px, 2px); filter: hue-rotate(90deg); }
+          94% { transform: translate(-3px, -2px); filter: none; }
+          96% { transform: translate(3px, 2px); filter: hue-rotate(-90deg); }
+          98% { transform: translate(3px, -2px); filter: none; }
+          100% { transform: translate(0); filter: none; }
+        }
+        .animate-glitch {
+          animation: glitch 3.5s infinite;
+        }
+      `}</style>
     </div>
   );
 }
