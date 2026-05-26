@@ -78,37 +78,37 @@ export default function AdminLogin() {
         <div className="p-4 text-black text-sm">
           <form onSubmit={submit} className="space-y-4">
             
-            <div className="flex flex-col sm:flex-row sm:items-center">
-              <label className="w-full sm:w-24 mb-1 sm:mb-0">Role:</label>
+            <div className="flex items-center">
+              <label className="w-24 shrink-0">Role:</label>
               <select 
                 aria-label="role" 
                 value={role} 
                 onChange={(e) => setRole(e.target.value)} 
-                className="flex-1 bg-white border border-gray-500 shadow-inner px-1 py-1 w-full"
+                className="flex-1 min-w-0 bg-white border border-gray-500 shadow-inner px-1 py-1"
               >
                 <option value="admin">Admin</option>
                 <option value="trainer">Trainer</option>
               </select>
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center">
-              <label className="w-full sm:w-24 mb-1 sm:mb-0">Username:</label>
+            <div className="flex items-center">
+              <label className="w-24 shrink-0">Username:</label>
               <input 
                 aria-label="username" 
                 value={username} 
                 onChange={(e) => setUsername(e.target.value)} 
-                className="flex-1 bg-white border-t-gray-500 border-l-gray-500 border-b-white border-r-white border-2 px-1 py-1 w-full" 
+                className="flex-1 min-w-0 bg-white border-t-gray-500 border-l-gray-500 border-b-white border-r-white border-2 px-1 py-1" 
               />
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center">
-              <label className="w-full sm:w-24 mb-1 sm:mb-0">Password:</label>
+            <div className="flex items-center">
+              <label className="w-24 shrink-0">Password:</label>
               <input 
                 aria-label="password" 
                 type="password" 
                 value={password} 
                 onChange={(e) => setPassword(e.target.value)} 
-                className="flex-1 bg-white border-t-gray-500 border-l-gray-500 border-b-white border-r-white border-2 px-1 py-1 w-full" 
+                className="flex-1 min-w-0 bg-white border-t-gray-500 border-l-gray-500 border-b-white border-r-white border-2 px-1 py-1" 
               />
             </div>
 
