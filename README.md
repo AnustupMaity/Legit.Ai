@@ -8,6 +8,11 @@
   <br/>
   <h1>🛡️ Legit.ai</h1>
   <p><b>Advanced AI-Powered Misinformation & Deepfake Detection Platform</b></p>
+  <br/>
+  <p>
+    🌍 <a href="https://legitai-app.vercel.app/"><b>Live Detection Portal</b></a> &nbsp; | &nbsp; 
+    🔐 <a href="https://legitai-app.vercel.app/admin-site/login"><b>Admin Dashboard</b></a>
+  </p>
 </div>
 
 ---
