@@ -29,8 +29,10 @@ It provides a seamless, cinematic public detection portal with deepfake analysis
 
 - **🌐 Browser-Isolated Sessions:** Public users can scan content anonymously without an account. All histories are tied to local browser sessions.
 - **🧹 24-Hour Auto-Scrubbing:** Privacy is prioritized. A background worker securely deletes all scanned records older than 24 hours from the database.
-- **🤖 Ensemble ML Pipeline:** Utilizes offline Hugging Face classifiers for text, zero-shot categorizations, and deepfake image/audio/video detection.
-- **🧠 LLM Fact-Checker & Explainer:** Integrates with Google Gemini (gemini-2.5-flash) to strictly fact-check historical/scientific claims, forcefully overriding ML classifiers if blatant misinformation is detected, while also providing human-readable explanations.
+- **🤖 Ensemble ML Pipeline:** Utilizes offline Hugging Face classifiers for text (`roberta-base-openai-detector`), zero-shot categorizations, and deepfake image detection (using `BLIP` and `dima806` face detection).
+- **🕵️ Deep Forensic Image Analysis:** Employs advanced algorithmic techniques like EXIF metadata anomaly detection and Error Level Analysis (ELA) to catch spliced or heavily photoshopped images before they even hit the AI models.
+- **🧠 Gemini 2.5 Flash Co-Pilot & Fallback:** Integrates with Google Gemini to strictly fact-check historical/scientific claims, acting as a Co-pilot to augment local ML classifiers, and gracefully falling back to handle full analysis if local models experience cloud memory limits.
+- **🔍 SHAP Explainability Engine:** Powered by SHAP (SHapley Additive exPlanations), providing users with transparent, token-level insights into exactly *why* the AI flagged specific words or phrases.
 - **🗄️ Serverless PostgreSQL:** Powered by NeonDB to ensure robust, persistent data storage that easily survives server restarts.
 - **⚡ GPU Acceleration:** Automatically detects and utilizes CUDA-compatible GPUs for rapid model inference, falling back to CPU gracefully.
 
@@ -52,9 +54,10 @@ graph TD
         D[JWT Auth & Rate Limiter]
         
         subgraph "Machine Learning Ensemble"
-            F[Text Transformers]
-            G[Image/Audio/Video Deepfake Models]
-            H[Gemini Fact-Checker & Explainer]
+            F[RoBERTa Text Classifiers]
+            G[BLIP / dima806 / EXIF / ELA Forensics]
+            H[Gemini 2.5 Flash Co-Pilot & Fallback]
+            J[SHAP Explainability Engine]
         end
     end
 
@@ -70,6 +73,7 @@ graph TD
     D <--> F
     D <--> G
     D <--> H
+    D <--> J
     
     C <-->|SQLAlchemy ORM| I
     E -.->|Purge 24h old data| I
