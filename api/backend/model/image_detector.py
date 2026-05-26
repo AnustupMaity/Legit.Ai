@@ -21,7 +21,11 @@ def load_image_model() -> bool:
         from transformers import pipeline
 
         kwargs = {"model": config.MODEL_IMAGE_CAPTION}
-        _caption_pipeline = pipeline("image-to-text", device=-1, **kwargs)
+        try:
+            _caption_pipeline = pipeline("image-text-to-text", device=-1, **kwargs)
+        except KeyError:
+            # Fallback for older transformers versions
+            _caption_pipeline = pipeline("image-to-text", device=-1, **kwargs)
         _load_error = None
         return True
     except Exception as exc:
