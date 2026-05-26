@@ -26,6 +26,7 @@ def load_image_model() -> bool:
         return True
     except Exception as exc:
         _load_error = str(exc)
+        print(f"\n[CRITICAL ERROR] Failed to load BLIP caption model: {exc}\n")
         _caption_pipeline = None
         return False
 
@@ -54,6 +55,7 @@ def load_ai_image_classifier() -> bool:
             return True
         except Exception as fallback_exc:
             _ai_load_error = str(fallback_exc)
+            print(f"\n[CRITICAL ERROR] Failed to load AI Image model: {fallback_exc}\n")
             return False
 
 
