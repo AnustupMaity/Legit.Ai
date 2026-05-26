@@ -63,6 +63,7 @@ def load_text_model() -> bool:
         _load_error = None
         return True
     except Exception as exc:
+        print(f"CRITICAL: Failed to load text model: {exc}")
         _load_error = str(exc)
         _text_pipeline = None
         return False
@@ -88,6 +89,7 @@ def load_enhanced_model() -> bool:
         _enhanced_load_error = None
         return True
     except Exception as exc:
+        print(f"CRITICAL: Failed to load enhanced text model: {exc}")
         _enhanced_load_error = str(exc)
         _enhanced_pipeline = None
         return False
