@@ -30,7 +30,7 @@ It provides a seamless, cinematic public detection portal with deepfake analysis
 - **🌐 Browser-Isolated Sessions:** Public users can scan content anonymously without an account. All histories are tied to local browser sessions.
 - **🧹 24-Hour Auto-Scrubbing:** Privacy is prioritized. A background worker securely deletes all scanned records older than 24 hours from the database.
 - **🤖 Ensemble ML Pipeline:** Utilizes offline Hugging Face classifiers for text, zero-shot categorizations, and deepfake image/audio/video detection.
-- **🧠 LLM Explainer:** Integrates with Google Gemini to provide human-readable explanations for *why* content was flagged as misinformation.
+- **🧠 LLM Fact-Checker & Explainer:** Integrates with Google Gemini (gemini-2.5-flash) to strictly fact-check historical/scientific claims, forcefully overriding ML classifiers if blatant misinformation is detected, while also providing human-readable explanations.
 - **🗄️ Serverless PostgreSQL:** Powered by NeonDB to ensure robust, persistent data storage that easily survives server restarts.
 - **⚡ GPU Acceleration:** Automatically detects and utilizes CUDA-compatible GPUs for rapid model inference, falling back to CPU gracefully.
 
@@ -54,7 +54,7 @@ graph TD
         subgraph "Machine Learning Ensemble"
             F[Text Transformers]
             G[Image/Audio/Video Deepfake Models]
-            H[Gemini Explainer API]
+            H[Gemini Fact-Checker & Explainer]
         end
     end
 
@@ -170,3 +170,8 @@ Legit.ai is designed to be deployed for **free**:
 
 ## 📄 License
 MIT License
+
+---
+<div align="center">
+  <p><b>Developed and Maintained by <a href="https://github.com/anustupmaity">Anustup Maity</a></b></p>
+</div>
