@@ -96,6 +96,39 @@ def _classify_ai_image(image_bytes: bytes) -> tuple[bool, float, str]:
     return fake, round(score * 100, 1), label
 
 
+def _analyze_image_with_gemini(image_bytes: bytes) -> dict | None:
+    if not config.USE_LLM or not config.GEMINI_API_KEY:
+        return None
+    try:
+        import google.generativeai as genai
+        import re
+        import json
+        
+        genai.configure(api_key=config.GEMINI_API_KEY)
+        # Gemini 1.5 models support multimodal input
+        model_name = config.GEMINI_MODEL
+        if not model_name or "gemini" not in model_name:
+            model_name = "gemini-1.5-flash"
+        model = genai.GenerativeModel(model_name)
+        
+        image = Image.open(io.BytesIO(image_bytes))
+        prompt = """You are a strict misinformation and deepfake analyst. Analyze this image. Is it an AI-generated deepfake/manipulated or authentic? Look for common deepfake artifacts like unnatural textures, mismatched lighting, text distortions, or anatomical anomalies.
+
+Respond with ONLY valid JSON (no markdown):
+{
+  "fake": true or false,
+  "confidence": 0-100 number,
+  "reason": "one or two sentences explaining why it is fake or authentic."
+}"""
+        response = model.generate_content([prompt, image])
+        match = re.search(r"\{[^{}]*\}", response.text, re.DOTALL)
+        if match:
+            return json.loads(match.group())
+    except Exception as e:
+        print(f"Gemini image API error: {e}")
+    return None
+
+
 def detect_image(image_bytes: bytes, filename: str | None = None) -> dict:
     ai_fake, ai_conf, ai_label = _classify_ai_image(image_bytes)
     caption = _caption_image(image_bytes)
@@ -105,13 +138,25 @@ def detect_image(image_bytes: bytes, filename: str | None = None) -> dict:
         result["model"] = f"{config.MODEL_IMAGE_CAPTION} -> {result['model']}"
         result["reason"] = f'Caption: "{caption[:180]}". {result["reason"]}'
     else:
-        result = {
-            "fake": ai_fake,
-            "confidence": ai_conf or 50.0,
-            "reason": "Caption model unavailable.",
-            "model": "fallback",
-            "labels": [],
-        }
+        # Fallback to Gemini if configured
+        gemini_result = _analyze_image_with_gemini(image_bytes)
+        if gemini_result:
+            result = {
+                "fake": gemini_result.get("fake", ai_fake),
+                "confidence": gemini_result.get("confidence", ai_conf or 50.0),
+                "reason": f"Gemini Analysis: {gemini_result.get('reason', 'Analysis completed')}",
+                "model": "gemini-fallback",
+                "labels": [],
+            }
+        else:
+            err_msg = get_image_load_error() or "Unknown error"
+            result = {
+                "fake": ai_fake,
+                "confidence": ai_conf or 50.0,
+                "reason": f"Caption model unavailable. Error: {err_msg}",
+                "model": "fallback",
+                "labels": [],
+            }
 
     if ai_label:
         result["labels"] = [
