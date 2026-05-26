@@ -12,7 +12,7 @@ export default function TrainerDashboard(){
   const fetchJobs = async () => {
     if (!isTrainer) return;
     try {
-      const res = await fetch('/api/ml_pipeline/jobs');
+      const res = await fetch('/backend/ml_pipeline/jobs');
       if (res.ok) {
         const data = await res.json();
         setJobs(data.jobs || []);
@@ -39,7 +39,7 @@ export default function TrainerDashboard(){
     form.append('dataset_file', file);
     setMessage('Uploading...');
     try{
-      const res = await fetch('/api/ml_pipeline/fine-tune', { method: 'POST', body: form, credentials: 'include' });
+      const res = await fetch('/backend/ml_pipeline/fine-tune', { method: 'POST', body: form, credentials: 'include' });
       if(!res.ok) throw new Error('upload failed');
       const data = await res.json();
       setMessage('Job enqueued: ' + (data.job_id || ''));

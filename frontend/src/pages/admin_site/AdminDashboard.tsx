@@ -22,7 +22,7 @@ export default function AdminDashboard() {
   const fetchTrainers = async () => {
     const token = localStorage.getItem('access_token');
     try {
-      const res = await fetch('/api/trainers', {
+      const res = await fetch('/backend/trainers', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -48,7 +48,7 @@ export default function AdminDashboard() {
     
     const token = localStorage.getItem('access_token');
     try {
-      await fetch('/api/trainers', {
+      await fetch('/backend/trainers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ username: newUsername, password: newPassword })
