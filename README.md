@@ -1,11 +1,14 @@
 <div align="center">
-  <img src="https://img.shields.io/badge/Status-Active-success" alt="Status">
-  <img src="https://img.shields.io/badge/License-MIT-blue" alt="License">
+  <a href="https://legitai-app.vercel.app/" target="_blank">
+    <img src="https://img.shields.io/badge/Deployed_on-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Deployed on Vercel">
+  </a>
+  <img src="https://img.shields.io/badge/Status-Active-success?style=for-the-badge" alt="Status">
+  <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="License">
+  
   <h1>🛡️ Legit.ai</h1>
   <p><b>Advanced AI-Powered Misinformation & Deepfake Detection Platform</b></p>
 </div>
 
----
 
 ## 📖 Overview
 
